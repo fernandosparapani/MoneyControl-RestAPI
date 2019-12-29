@@ -1,5 +1,7 @@
 'use strict'
 
+const MovementType = use('App/Models/MovementType')
+
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
@@ -8,85 +10,54 @@
  * Resourceful controller for interacting with movementtypes
  */
 class MovementTypeController {
-  /**
-   * Show a list of all movementtypes.
-   * GET movementtypes
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async index ({ request, response, view }) {
+
+  async index ({ auth }) {
+
+    const movementType = await MovementType.query().where('user_id', auth.user.id).with('user').fetch()
+
+    return movementType
+
   }
 
-  /**
-   * Render a form to be used for creating a new movementtype.
-   * GET movementtypes/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
+  async store ({ request, auth }) {
+
+    const data = request.only(['title', 'description', 'operationType'])
+
+    const movementType = await MovementType.create({ ...data, user_id: auth.user.id })
+
+    return movementType
+
   }
 
-  /**
-   * Create/save a new movementtype.
-   * POST movementtypes
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async store ({ request, response }) {
+  async show ({ params }) {
+
+    const movementType = await MovementType.findOrFail(params.id)
+
+    await movementType.load('user')
+
+    return movementType
+
   }
 
-  /**
-   * Display a single movementtype.
-   * GET movementtypes/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async show ({ params, request, response, view }) {
+  async update ({ params, request }) {
+
+    const movementType = await MovementType.findOrFail(params.id)
+    const data = request.only(['title', 'description', 'operationType'])
+
+    movementType.merge(data)
+
+    await movementType.save()
+
+    return movementType
+
   }
 
-  /**
-   * Render a form to update an existing movementtype.
-   * GET movementtypes/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
-  }
+  async destroy ({ params }) {
 
-  /**
-   * Update movementtype details.
-   * PUT or PATCH movementtypes/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async update ({ params, request, response }) {
-  }
+    const movementType = await MovementType.findOrFail(params.id)
 
-  /**
-   * Delete a movementtype with id.
-   * DELETE movementtypes/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async destroy ({ params, request, response }) {
+    await movementType.delete()
+
   }
 }
 

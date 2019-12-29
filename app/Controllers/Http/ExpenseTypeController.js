@@ -11,14 +11,15 @@ const ExpenseType = use('App/Models/ExpenseType')
  */
 class ExpenseTypeController {
 
-  async index ({ }) {
-    const expenseType = await ExpenseType.query().with('user').fetch()
+  async index ({ auth }) {
+
+    const expenseType = await ExpenseType.query().where('user_id', auth.user.id).with('user').fetch()
 
     return expenseType
   }
 
   async store ({ request, auth }) {
-    const data = request.only(['title', 'description', 'operationType'])
+    const data = request.only(['title', 'description'])
 
     const expenseType = await ExpenseType.create({ ...data, user_id: auth.user.id })
 
@@ -26,6 +27,7 @@ class ExpenseTypeController {
   }
 
   async show ({ params }) {
+
     const expenseType = await ExpenseType.findOrFail(params.id)
 
     await expenseType.load('user')
@@ -36,7 +38,7 @@ class ExpenseTypeController {
   async update ({ params, request }) {
 
     const expenseType = await ExpenseType.findOrFail(params.id)
-    const data = request.only(['title', 'description', 'operationType'])
+    const data = request.only(['title', 'description'])
 
     expenseType.merge(data)
 
