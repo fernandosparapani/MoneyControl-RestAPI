@@ -43,5 +43,5 @@
   "string": "{{field}} deve ser um texto.",
   "under": "{{field}} precisa ser abaixo de {{argument.0}}.",
   "unique": "{{field}} já está em uso, escolhe um diferente.",
-  "url": "URL inválida."
+  "url": "URL inválida."  
 }

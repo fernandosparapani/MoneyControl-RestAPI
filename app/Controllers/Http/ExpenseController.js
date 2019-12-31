@@ -1,5 +1,7 @@
 'use strict'
 
+const Expense = use('App/Models/Expense')
+
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
@@ -7,86 +9,84 @@
 /**
  * Resourceful controller for interacting with Expenses
  */
+
 class ExpenseController {
-  /**
-   * Show a list of all Expenses.
-   * GET Expenses
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async index ({ request, response, view }) {
+
+  async index ({ auth }) {
+
+    const expense = await Expense.query().where('user_id', auth.user.id).with('user').with('movementType').with('expenseType').fetch()
+    // const expense = await Expense.query().where('user_id', auth.user.id).fetch()
+    return expense
+
   }
 
-  /**
-   * Render a form to be used for creating a new Expense.
-   * GET Expenses/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
+  async store ({ request, auth }) {
+  
+    const data = request.only(['expense_type_id', 'movement_type_id', 'title', 'value', 'due_date'])
+
+    const expense = await Expense.create({ ...data, user_id: auth.user.id })
+
+    return expense
+  
   }
 
-  /**
-   * Create/save a new Expense.
-   * POST Expenses
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async store ({ request, response }) {
+  async multipleStore ({ request, auth }) {
+
+    var moment = require('moment');
+
+    const data = request.only(['expense_type_id', 'movement_type_id', 'title', 'value', 'due_date'])
+    const expensesQtd = request.only(['expensesQtd'])
+    let dataRequest = { ...data }
+    let counter = 0
+
+    while (counter < expensesQtd.expensesQtd) {
+
+      Expense.create({ ...dataRequest, user_id: auth.user.id })
+
+      var due_date = moment(dataRequest.due_date)
+      due_date.add('1', 'months')
+
+      dataRequest.due_date = due_date.format("YYYY-MM-DD HH:mm:ss")
+
+      counter += 1
+
+    }
+
+    return dateRequest
+
   }
 
-  /**
-   * Display a single Expense.
-   * GET Expenses/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async show ({ params, request, response, view }) {
+  async show ({ params }) {
+
+    const expense = await Expense.findOrFail(params.id)
+
+    await expense.load('user')
+    await expense.load('movementType')
+    await expense.load('expenseType')
+
+    return expense
+
   }
 
-  /**
-   * Render a form to update an existing Expense.
-   * GET Expenses/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
+  async update ({ params, request }) {
+
+    const expense = await Expense.findOrFail(params.id)
+    const data = request.only(['expense_type_id', 'movement_type_id', 'title', 'value', 'due_date'])
+
+    expense.merge(data)
+
+    await expense.save()
+
+    return expense
+
   }
 
-  /**
-   * Update Expense details.
-   * PUT or PATCH Expenses/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async update ({ params, request, response }) {
-  }
+  async destroy ({ params }) {
 
-  /**
-   * Delete a Expense with id.
-   * DELETE Expenses/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async destroy ({ params, request, response }) {
+    const expense = await Expense.findOrFail(params.id)
+
+    await expense.delete()
+
   }
 }
 
