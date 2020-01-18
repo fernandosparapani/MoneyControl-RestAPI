@@ -1,0 +1,63 @@
+
+// Autenticação sistema
+Users 
+    username String(80)
+    email String(254)
+    password String(60)
+
+// Tipo de gasto/crédito que está sendo lançado (salário, freela, etc)
+MovementType
+    title String(60)
+    description String(254)
+    operationType Character(1)
+
+// Período de gasto (recorrente, planejado, futuro)
+ExpenseType
+    title String(60)
+    description String(254)    
+
+Expense
+    title String(60) 
+    value Number 
+    created_at Date
+    due_date Date
+    dmovementType_id (FK)
+    dexpenseType_id (FK)
+
+// Controle de quanto está sendo mantido em conta corrente
+CurrentAcount
+    value Number
+    movement_date Date
+
+---------------------------------------------------------------------------------------
+----------------------------------ACIMA FEITO------------------------------------------
+---------------------------------------------------------------------------------------
+
+Gain
+    title String(60)
+    value Number
+    created_at Date
+    due_date Date
+    dmovementType_id (FK)
+    dexpenseType_id (FK)
+
+// Meta a ser alcançada para fins de objetivos
+Goal
+    title String(60)
+    value Number
+    created_at Date
+    due_date Date
+    dexpenseType_id (FK)
+
+// Lançamento de dívidas que não possuem valor fixo mensal (amigos e familiares agiotas)
+Moneylender
+    title String(60)
+    value Number
+    created_at Date
+    due_date Date
+    dexpenseType_id (FK)
+
+// Controle de quanto está sendo mantido em poupança
+Savings
+    value Number
+    movement_date Date
